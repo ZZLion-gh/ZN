@@ -1,0 +1,805 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Vocabulary Adventure V7</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:linear-gradient(to bottom,#dfefff,#fff9f2);
+margin:0;
+padding:0;
+color:#333;
+}
+
+.container{
+width:92%;
+max-width:1100px;
+margin:25px auto;
+background:white;
+border-radius:20px;
+padding:25px;
+box-shadow:0 4px 16px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+text-align:center;
+color:#4c6a92;
+}
+
+.progressBox{
+background:#fff4d6;
+padding:18px;
+border-radius:15px;
+font-size:20px;
+line-height:1.9;
+margin-bottom:25px;
+text-align:center;
+}
+
+.card-container{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+margin-top:30px;
+}
+
+.card{
+width:220px;
+min-height:130px;
+border-radius:16px;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+padding:12px;
+cursor:pointer;
+}
+
+.wordCard{background:#dff7e2;}
+.pronounceCard{background:#dfefff;}
+.meaningCard{background:#ffe7e7;}
+
+button{
+padding:10px 18px;
+margin:8px;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+background:#89b6ff;
+color:white;
+}
+
+.nav{
+text-align:center;
+margin-top:20px;
+}
+
+.hidden{
+display:none;
+}
+
+.questionRow{
+display:flex;
+gap:30px;
+margin-top:25px;
+}
+
+.leftColumn{
+flex:1;
+background:#fff6d9;
+padding:35px;
+border-radius:16px;
+font-size:32px;
+text-align:center;
+}
+
+.rightColumn{
+flex:1;
+}
+
+.choice{
+display:block;
+width:100%;
+margin-bottom:15px;
+background:#dff0ff;
+color:#333;
+font-size:20px;
+}
+
+.feedback{
+text-align:center;
+font-size:22px;
+margin-top:20px;
+font-weight:bold;
+}
+
+input{
+width:80%;
+padding:12px;
+font-size:20px;
+margin:25px auto;
+display:block;
+border-radius:10px;
+border:2px solid #bdd7ff;
+}
+
+.bubbleArea{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:18px;
+margin-top:30px;
+}
+
+.bubble{
+background:#dff0ff;
+border-radius:50px;
+padding:18px 24px;
+font-size:20px;
+cursor:pointer;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+min-width:160px;
+text-align:center;
+transition:0.2s;
+}
+
+.bubble:hover{
+transform:scale(1.05);
+}
+
+.selected{
+background:#ffd27f;
+}
+
+@media(max-width:768px){
+.questionRow{
+flex-direction:column;
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⛅ Weather Vocabulary Adventure</h1>
+
+<div class="progressBox">
+
+<div>
+📘 Stage 1:
+✅ Completed <span id="s1Done">1</span>
+|
+📌 Left <span id="s1Left">39</span>
+</div>
+
+<div>
+🎯 Stage 2:
+✅ Completed <span id="s2Done">0</span>
+|
+📌 Left <span id="s2Left">30</span>
+</div>
+
+<div>
+✍️ Stage 3:
+✅ Completed <span id="s3Done">0</span>
+|
+📌 Left <span id="s3Left">10</span>
+</div>
+
+<div>
+🫧 Stage 4:
+✅ Completed <span id="s4Done">0</span>
+|
+📌 Left <span id="s4Left">0</span>
+</div>
+
+</div>
+
+<!-- Stage 1 -->
+
+<div id="stage1">
+
+<h2>🌤 Stage 1: Word Memorizing</h2>
+
+<div style="text-align:center;font-size:18px;" id="memorizeProgress"></div>
+
+<div class="card-container">
+
+<div class="card wordCard" id="wordCard"></div>
+
+<div class="card pronounceCard" onclick="speakWord()">
+🔊 Click to Pronounce
+</div>
+
+<div class="card meaningCard" id="meaningCard"></div>
+
+</div>
+
+<div class="nav">
+<button onclick="prevWord()">Previous</button>
+<button onclick="nextWord()">Next</button>
+<button onclick="goStage2()">Go to Stage 2</button>
+</div>
+
+</div>
+
+<!-- Stage 2 -->
+
+<div id="stage2" class="hidden">
+
+<h2>🌦 Stage 2: Word Guessing</h2>
+
+<div class="questionRow">
+
+<div class="leftColumn" id="guessMeaning"></div>
+
+<div class="rightColumn" id="choices"></div>
+
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<div class="nav">
+<button onclick="backToStage1()">⬅ Back</button>
+<button onclick="nextQuestion()">Next Question</button>
+<button onclick="goStage3()">Go to Stage 3</button>
+</div>
+
+</div>
+
+<!-- Stage 3 -->
+
+<div id="stage3" class="hidden">
+
+<h2>🌈 Stage 3: Sentence Practice</h2>
+
+<div style="font-size:26px;text-align:center;margin-top:25px;" id="sentence"></div>
+
+<div style="font-size:20px;text-align:center;margin-top:15px;color:#666;" id="sentenceCN"></div>
+
+<input type="text" id="answerInput">
+
+<div class="feedback" id="sentenceFeedback"></div>
+
+<div class="nav">
+<button onclick="backToStage2()">⬅ Back</button>
+<button onclick="checkSentence()">Check</button>
+<button onclick="nextSentence()">Next</button>
+<button onclick="goStage4()">Go to Stage 4</button>
+</div>
+
+</div>
+
+<!-- Stage 4 -->
+
+<div id="stage4" class="hidden">
+
+<h2>🫧 Stage 4: Bubble Matching</h2>
+
+<div style="text-align:center;font-size:24px;color:#4c6a92;" id="groupTitle"></div>
+
+<div class="bubbleArea" id="bubbleArea"></div>
+
+<div class="feedback" id="bubbleFeedback"></div>
+
+<div class="nav">
+<button onclick="backToStage3()">⬅ Back</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// ==========================
+// Stage 1
+// ==========================
+
+const stage1Words = [
+
+["sunshine","阳光","☀️"],
+["rain","雨","🌧️"],
+["storm","暴风雨","⛈️"],
+["wind","风","💨"],
+["fog","雾","🌫️"],
+["cloud","云","☁️"],
+["snow","雪","☃️"],
+["ice","冰","🧊"],
+["humidity","湿度","💧"],
+["drought","干旱","🏜️"],
+["heat","高温","🌡️"],
+["warmth","温暖","😊"],
+["temperature","温度","🌡️"],
+["forecast","天气预报","📺"],
+["climate","气候","🌍"],
+["hot","炎热的","🥵"],
+["warm","温暖的","😊"],
+["mild","温和的","🙂"],
+["cool","凉爽的","😎"],
+["chilly","微冷的","🧣"],
+["freezing","极冷的","🧊"],
+["sunny","晴朗的","☀️"],
+["cloudy","多云的","☁️"],
+["overcast","阴天的","🌥️"],
+["rainy","下雨的","🌧️"],
+["wet","潮湿的","💦"],
+["stormy","暴风雨的","⛈️"],
+["snowy","下雪的","❄️"],
+["foggy","多雾的","🌫️"],
+["windy","多风的","💨"],
+["humid","潮湿的","💧"],
+["dry","干燥的","🏜️"],
+["breezy","微风习习的","🍃"],
+["thunder","雷","⚡"],
+["lightning","闪电","🌩️"],
+["hurricane","飓风","🌪️"],
+["tornado","龙卷风","🌪️"],
+["cold","寒冷的","🥶"],
+["misty","薄雾弥漫的","🌁"],
+["icy","结冰的","🧊"]
+
+];
+
+let currentWord = 0;
+
+function updateS1(){
+document.getElementById("s1Done").innerText = currentWord + 1;
+document.getElementById("s1Left").innerText =
+stage1Words.length - currentWord - 1;
+}
+
+function showWord(){
+
+const item = stage1Words[currentWord];
+
+document.getElementById("wordCard").innerHTML =
+item[2] + "<br>" + item[0];
+
+document.getElementById("meaningCard").innerHTML =
+item[2] + "<br>" + item[1];
+
+document.getElementById("memorizeProgress").innerText =
+"Word " + (currentWord+1) + " / " + stage1Words.length;
+
+updateS1();
+
+}
+
+function speakWord(){
+speechSynthesis.speak(
+new SpeechSynthesisUtterance(stage1Words[currentWord][0])
+);
+}
+
+function nextWord(){
+if(currentWord < stage1Words.length-1){
+currentWord++;
+showWord();
+}
+}
+
+function prevWord(){
+if(currentWord > 0){
+currentWord--;
+showWord();
+}
+}
+
+showWord();
+
+// ==========================
+// Stage 2
+// ==========================
+
+const stage2Words = stage1Words.slice(0,30);
+
+let used = [];
+let currentAnswer = "";
+let stage2Done = 0;
+
+function updateS2(){
+document.getElementById("s2Done").innerText = stage2Done;
+document.getElementById("s2Left").innerText =
+30 - stage2Done;
+}
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5);
+}
+
+function loadQuestion(){
+
+if(used.length >= 30){
+
+document.getElementById("feedback").innerText =
+"🎉 Stage 2 Completed";
+
+document.getElementById("choices").innerHTML = "";
+
+return;
+}
+
+let available =
+stage2Words.filter(x=>!used.includes(x[0]));
+
+const item =
+available[Math.floor(Math.random()*available.length)];
+
+used.push(item[0]);
+
+currentAnswer = item[0];
+
+document.getElementById("guessMeaning").innerHTML =
+item[2] + "<br>" + item[1];
+
+let options = [item[0]];
+
+while(options.length < 4){
+
+let random =
+stage2Words[Math.floor(Math.random()*stage2Words.length)][0];
+
+if(!options.includes(random)){
+options.push(random);
+}
+
+}
+
+options = shuffle(options);
+
+let html = "";
+
+options.forEach(op=>{
+html += `<button class="choice"
+onclick="checkChoice('${op}')">${op}</button>`;
+});
+
+document.getElementById("choices").innerHTML = html;
+
+}
+
+function checkChoice(choice){
+
+if(choice === currentAnswer){
+
+document.getElementById("feedback").innerText =
+"✅ Correct";
+
+stage2Done++;
+updateS2();
+
+}else{
+
+document.getElementById("feedback").innerText =
+"❌ Correct answer: " + currentAnswer;
+
+}
+
+}
+
+function nextQuestion(){
+loadQuestion();
+}
+
+function goStage2(){
+document.getElementById("stage1").classList.add("hidden");
+document.getElementById("stage2").classList.remove("hidden");
+loadQuestion();
+}
+
+function backToStage1(){
+document.getElementById("stage2").classList.add("hidden");
+document.getElementById("stage1").classList.remove("hidden");
+}
+
+// ==========================
+// Stage 3
+// ==========================
+
+const sentences = [
+
+["Today is very ______ and bright.","sunny","今天阳光明媚。"],
+["There is heavy ______ outside.","rain","外面正在下大雨。"],
+["The morning is cold and ______.","foggy","早晨寒冷而多雾。"],
+["A strong ______ blew all night.","wind","强风吹了一整夜。"],
+["The air feels very ______ in summer.","humid","夏天空气非常潮湿。"],
+["We heard loud ______ during the storm.","thunder","暴风雨期间我们听到了巨大的雷声。"],
+["The road became dangerous because of the ______.","ice","因为结冰，道路变得危险。"],
+["Tomorrow will be ______ with light rain.","cloudy","明天将多云并伴有小雨。"],
+["The grass was covered with ______ this morning.","frost","今天早晨草地覆盖着霜。"],
+["The desert suffers from long periods of ______.","drought","沙漠长期遭受干旱。"]
+
+];
+
+let sentenceIndex = 0;
+let stage3Done = 0;
+
+function updateS3(){
+document.getElementById("s3Done").innerText = stage3Done;
+document.getElementById("s3Left").innerText =
+10 - stage3Done;
+}
+
+function loadSentence(){
+
+document.getElementById("sentence").innerText =
+sentences[sentenceIndex][0];
+
+document.getElementById("sentenceCN").innerText =
+sentences[sentenceIndex][2];
+
+document.getElementById("answerInput").value = "";
+
+}
+
+function checkSentence(){
+
+let ans =
+document.getElementById("answerInput")
+.value.trim().toLowerCase();
+
+if(ans === sentences[sentenceIndex][1]){
+
+document.getElementById("sentenceFeedback").innerText =
+"✅ Correct";
+
+stage3Done++;
+updateS3();
+
+}else{
+
+document.getElementById("sentenceFeedback").innerText =
+"❌ Correct answer: " + sentences[sentenceIndex][1];
+
+}
+
+}
+
+function nextSentence(){
+if(sentenceIndex < sentences.length-1){
+sentenceIndex++;
+loadSentence();
+}
+}
+
+function goStage3(){
+document.getElementById("stage2").classList.add("hidden");
+document.getElementById("stage3").classList.remove("hidden");
+loadSentence();
+}
+
+function backToStage2(){
+document.getElementById("stage3").classList.add("hidden");
+document.getElementById("stage2").classList.remove("hidden");
+}
+
+// ==========================
+// Stage 4
+// ==========================
+
+const groups = [
+
+{
+title:"Group 1 — Describing Temperature",
+pairs:[
+["hot","炎热的"],
+["warm","温暖的"],
+["mild","温和的"],
+["cool","凉爽的"],
+["chilly","微冷的"],
+["cold","寒冷的"],
+["freezing","极冷的"]
+]
+},
+
+{
+title:"Group 2 — Sky and Precipitation",
+pairs:[
+["sunny","晴朗的"],
+["cloudy","多云的"],
+["overcast","阴天的"],
+["rainy","下雨的"],
+["wet","潮湿的"],
+["stormy","暴风雨的"],
+["snowy","下雪的"],
+["foggy","多雾的"],
+["misty","薄雾弥漫的"],
+["icy","结冰的"]
+]
+},
+
+{
+title:"Group 3 — Wind and Air",
+pairs:[
+["windy","多风的"],
+["breezy","微风习习的"],
+["humid","潮湿的"],
+["dry","干燥的"]
+]
+},
+
+{
+title:"Group 4 — Useful Collocations",
+pairs:[
+["heavy rain","大雨"],
+["strong wind","强风"],
+["thick fog","浓雾"],
+["bright sunshine","明媚的阳光"],
+["freezing cold","冰冷刺骨"],
+["pouring rain","倾盆大雨"],
+["clear sky","晴空"],
+["severe storm","强烈暴风雨"]
+]
+}
+
+];
+
+let currentGroup = 0;
+let selected = null;
+let stage4Done = 0;
+let stage4Left = 0;
+
+function updateS4(){
+
+document.getElementById("s4Done").innerText = stage4Done;
+document.getElementById("s4Left").innerText = stage4Left;
+
+}
+
+function goStage4(){
+
+document.getElementById("stage3").classList.add("hidden");
+document.getElementById("stage4").classList.remove("hidden");
+
+currentGroup = 0;
+
+loadGroup();
+
+}
+
+function backToStage3(){
+
+document.getElementById("stage4").classList.add("hidden");
+document.getElementById("stage3").classList.remove("hidden");
+
+}
+
+function loadGroup(){
+
+selected = null;
+
+const group = groups[currentGroup];
+
+document.getElementById("groupTitle").innerText =
+group.title;
+
+const area = document.getElementById("bubbleArea");
+
+area.innerHTML = "";
+
+let bubbles = [];
+
+group.pairs.forEach(pair=>{
+
+bubbles.push({
+text:pair[0],
+match:pair[1]
+});
+
+bubbles.push({
+text:pair[1],
+match:pair[0]
+});
+
+});
+
+bubbles = shuffle(bubbles);
+
+stage4Done = 0;
+stage4Left = group.pairs.length;
+
+updateS4();
+
+bubbles.forEach(item=>{
+
+const div = document.createElement("div");
+
+div.className = "bubble";
+
+div.innerText = item.text;
+
+div.dataset.match = item.match;
+
+div.onclick = ()=>chooseBubble(div);
+
+area.appendChild(div);
+
+});
+
+}
+
+function chooseBubble(div){
+
+if(selected === null){
+
+selected = div;
+div.classList.add("selected");
+
+}else{
+
+if(
+selected.dataset.match === div.innerText &&
+div.dataset.match === selected.innerText
+){
+
+selected.style.display = "none";
+div.style.display = "none";
+
+stage4Done++;
+stage4Left--;
+
+updateS4();
+
+document.getElementById("bubbleFeedback").innerText =
+"✅ Correct Match";
+
+checkGroupDone();
+
+}else{
+
+document.getElementById("bubbleFeedback").innerText =
+"❌ Try Again";
+
+selected.classList.remove("selected");
+
+}
+
+selected = null;
+
+}
+
+}
+
+function checkGroupDone(){
+
+if(stage4Left === 0){
+
+currentGroup++;
+
+if(currentGroup < groups.length){
+
+setTimeout(()=>{
+loadGroup();
+},700);
+
+}else{
+
+document.getElementById("bubbleFeedback").innerText =
+"🏆 Stage 4 Completed";
+
+}
+
+}
+
+}
+
+updateS2();
+updateS3();
+
+</script>
+
+</body>
+</html>
